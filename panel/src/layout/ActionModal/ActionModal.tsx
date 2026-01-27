@@ -185,6 +185,7 @@ export default function ActionModal() {
                                 />}
                                 {selectedTab === 'IDs' && <ActionIdsTab
                                     action={modalData.action}
+                                    refreshModalData={refreshModalData}
                                 />}
                                 {selectedTab === 'Revoke' && <ActionModifyTab
                                     action={modalData.action}

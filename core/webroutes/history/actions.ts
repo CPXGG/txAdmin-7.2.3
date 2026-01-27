@@ -1,7 +1,7 @@
 const modulename = 'WebServer:HistoryActions';
 import { GenericApiOkResp } from '@shared/genericApiTypes';
 import { DatabaseActionType } from '@core/components/PlayerDatabase/databaseTypes';
-import { calcExpirationFromDuration } from '@core/extras/helpers';
+import { anyUndefined, calcExpirationFromDuration } from '@core/extras/helpers';
 import consts from '@shared/consts';
 import humanizeDuration, { Unit } from 'humanize-duration';
 import consoleFactory from '@extras/console';
@@ -39,6 +39,10 @@ export default async function HistoryActions(ctx: AuthedCtx & { params: any }) {
         return sendTypedResp(await handleBandIds(ctx));
     } else if (action === 'revokeAction') {
         return sendTypedResp(await handleRevokeAction(ctx));
+    } else if (action === 'unlink_id') {
+        return sendTypedResp(await handleUnlinkId(ctx, false));
+    } else if (action === 'unlink_hwid') {
+        return sendTypedResp(await handleUnlinkId(ctx, true));
     } else {
         return sendTypedResp({ error: 'unknown action' });
     }
@@ -192,6 +196,52 @@ async function handleRevokeAction(ctx: AuthedCtx): Promise<GenericApiOkResp> {
             playerHwids: action.hwids ?? [],
             revokedBy: ctx.admin.name,
         });
+    } catch (error) { }
+    return { success: true };
+}
+
+async function handleUnlinkId(ctx: AuthedCtx, isHwid: boolean): Promise<GenericApiOkResp> {
+    //Checking request
+    if (anyUndefined(
+        ctx.request.body,
+        ctx.request.query.actionId,
+        ctx.request.body.id,
+    )) {
+        return { error: 'Invalid request' };
+    }
+
+    const actionId = ctx.request.query.actionId.trim();
+    const idToRemove = ctx.request.body.id.trim();
+    
+    //Check permissions
+    if (!ctx.admin.testPermission('players.ban', modulename)) {
+        return { error: 'You don\'t have permission to execute this action.' }
+    }
+
+    //Check permissions
+    if (!ctx.admin.testPermission('players.ban', modulename)) {
+        return { error: 'You don\'t have permission to execute this action.' }
+    }
+
+    const actionData = ctx.txAdmin.playerDatabase.getActionData(actionId);
+
+    if (!actionData) {
+        return { error: 'Action not found' };
+    }
+
+    const allIds = isHwid ? actionData.hwids : actionData.ids;
+
+    if (!allIds || !allIds.includes(idToRemove)) {
+        return { error: 'Identifier not found in action data' };
+    }
+
+    let resultActionData
+    try {
+        resultActionData = ctx.txAdmin.playerDatabase.removeActionIdentifier(
+            actionData.id,
+            idToRemove,
+            isHwid
+        );
     } catch (error) { }
     return { success: true };
 }

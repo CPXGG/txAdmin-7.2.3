@@ -43,6 +43,10 @@ export default async function PlayerActions(ctx: AuthedCtx) {
         return sendTypedResp(await handleMessage(ctx, player));
     } else if (action === 'kick') {
         return sendTypedResp(await handleKick(ctx, player));
+    } else if (action === 'unlink_id') {
+        return sendTypedResp(await handleUnlinkId(ctx, player, false));
+    } else if (action === 'unlink_hwid') {
+        return sendTypedResp(await handleUnlinkId(ctx, player, true));
     } else {
         return sendTypedResp({ error: 'unknown action' });
     }
@@ -234,6 +238,50 @@ async function handleBan(ctx: AuthedCtx, player: PlayerClass): Promise<GenericAp
     } else {
         return { error: `Player banned, but likely failed to kick player (stdin error).` };
     }
+}
+
+async function handleUnlinkId(ctx: AuthedCtx, player: PlayerClass, isHwid: boolean): Promise<GenericApiResp> {
+    //Checking request
+    if (
+        anyUndefined(
+            ctx.request.body,
+            ctx.request.body.id,
+        )
+    ) {
+        return { error: 'Invalid request.' };
+    }
+
+    const idToRemove = ctx.request.body.id.trim();
+
+    //Check permissions
+    if (!ctx.admin.testPermission('players.ban', modulename)) {
+        return { error: 'You don\'t have permission to execute this action.' }
+    }
+
+    //Validating player - hwids.length can be zero 
+    const allIds = isHwid ? player.getAllHardwareIdentifiers() : player.getAllIdentifiers();
+    if (!allIds.length) {
+        return { error: 'Player has no identifiers.' }
+    }
+
+    if (!allIds.includes(idToRemove)) {
+        return { error: 'The specified ID is not linked to this player.' }
+    }
+
+    let resultPlayer
+    try {
+        resultPlayer = ctx.txAdmin.playerDatabase.removePlayerIdentifier(
+            player.license!,
+            idToRemove,
+            player.uniqueId,
+            isHwid
+        );
+    } catch (error) {
+        return { error: `Failed to remove identifier: ${(error as Error).message}` };
+    }
+    ctx.admin.logAction(`Identifier removed from ${player.displayName}: ${idToRemove}`);
+
+    return { success: true };
 }
 
 

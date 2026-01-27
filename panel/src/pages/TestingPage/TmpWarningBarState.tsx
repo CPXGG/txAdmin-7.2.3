@@ -30,7 +30,7 @@ export default function TmpWarningBarState() {
                     </div>
                 </div>
 
-                <div className="space-y-2 rounded border p-2">
+                {/* <div className="space-y-2 rounded border p-2">
                     <pre className="bg-muted p-2">
                         {JSON.stringify(txUpdateData, null, 2)}
                     </pre>
@@ -74,7 +74,7 @@ export default function TmpWarningBarState() {
                             fxs No Update
                         </Button>
                     </div>
-                </div>
+                </div> */}
             </CardContent>
         </Card>
     );

@@ -189,6 +189,7 @@ export default function PlayerModal() {
                                 />}
                                 {selectedTab === 'IDs' && <PlayerIdsTab
                                     player={modalData.player}
+                                    playerRef={playerRef!}
                                 />}
                                 {selectedTab === 'Ban' && <PlayerBanTab
                                     banTemplates={modalData.banTemplates}

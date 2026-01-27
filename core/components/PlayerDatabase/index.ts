@@ -153,6 +153,24 @@ export default class PlayerDatabase {
         return newData;
     }
 
+    /**
+     * Removes an identifier from a player
+     */
+    removePlayerIdentifier(license: string, idToRemove: string, srcUniqueId: Symbol, isHwid: boolean): DatabasePlayerType {
+        if (!this.#db.obj) throw new Error(`database not ready yet`);
+        const playerDbObj = this.#db.obj.chain.get('players').find({ license });
+        if (!playerDbObj.value()) throw new Error('Player not found in database');
+        this.#db.writeFlag(SAVE_PRIORITY_LOW);
+        const newData = playerDbObj
+            .assign(isHwid ?
+                {hwids: playerDbObj.value()!.hwids.filter((hwid) => hwid !== idToRemove)} :
+                {ids: playerDbObj.value()!.ids.filter((id) => id !== idToRemove)}
+            )
+            .cloneDeep()
+            .value();
+        this.#txAdmin.playerlistManager.handleDbDataSync(newData, srcUniqueId);
+        return newData;
+    }
 
     /**
      * Revokes whitelist status of all players that match a filter function
@@ -316,6 +334,42 @@ export default class PlayerDatabase {
             };
             this.#db.writeFlag(SAVE_PRIORITY_HIGH);
             return cloneDeep(action);
+
+        } catch (error) {
+            const msg = `Failed to revoke action with message: ${(error as Error).message}`;
+            console.error(msg);
+            console.verbose.dir(error);
+            throw error;
+        }
+    }
+
+    /**
+     * Unlink an identifier from an action (ban, warn)
+     */
+    removeActionIdentifier(
+        actionId: string,
+        idToRemove: string,
+        isHwid: boolean
+    ): DatabaseActionType {
+        if (!this.#db.obj) throw new Error(`database not ready yet`);
+        if (typeof actionId !== 'string' || !actionId.length) throw new Error('Invalid actionId.');
+        if (typeof idToRemove !== 'string') throw new Error('Invalid author.');
+
+        try {
+            const action = this.#db.obj.chain.get('actions').find({ id: actionId });
+
+            if (!action.value()) throw new Error(`action not found`);
+
+            this.#db.writeFlag(SAVE_PRIORITY_LOW);
+            const newData = action
+                .assign(isHwid ?
+                    {hwids: (action.value()!.hwids || []).filter((hwid) => hwid !== idToRemove)} :
+                    {ids: action.value()!.ids.filter((id) => id !== idToRemove)}
+                )
+                .cloneDeep()
+                .value();
+
+            return newData;
 
         } catch (error) {
             const msg = `Failed to revoke action with message: ${(error as Error).message}`;

@@ -78,6 +78,7 @@ export default async function PlayerModal(ctx: AuthedCtx) {
         playerData.oldIds = playerDbData.ids;
         playerData.oldHwids = playerDbData.hwids;
         playerData.tsLastConnection = playerDbData.tsLastConnection;
+        playerData.lastConnectionData = playerDbData.lastConnectionData;
 
         if (playerDbData.notes?.lastAdmin && playerDbData.notes?.tsLastEdit) {
             playerData.notes = playerDbData.notes.text;

@@ -5,13 +5,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { usePlayerModalStateValue } from "@/hooks/playerModal";
-import { InfoIcon, ListIcon, HistoryIcon, GavelIcon } from "lucide-react";
+import { InfoIcon, ListIcon, HistoryIcon, GavelIcon, UnplugIcon } from "lucide-react";
 import PlayerInfoTab from "./PlayerInfoTab";
 import { useEffect, useState } from "react";
 import PlayerIdsTab from "./PlayerIdsTab";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PlayerHistoryTab from "./PlayerHistoryTab";
 import PlayerBanTab from "./PlayerBanTab";
+import PlayerLastConnectionTab from "./PlayerLastConnectionTab";
 import GenericSpinner from "@/components/GenericSpinner";
 import { cn } from "@/lib/utils";
 import { useBackendApi } from "@/hooks/fetch";
@@ -37,6 +38,10 @@ const modalTabs = [
         title: 'Ban',
         icon: <GavelIcon className="mr-2 h-5 w-5 hidden xs:block" />,
         className: 'hover:bg-destructive hover:text-destructive-foreground',
+    },
+    {
+        title: 'Login',
+        icon: <UnplugIcon className="mr-2 h-5 w-5 hidden xs:block" />
     }
 ]
 
@@ -135,7 +140,7 @@ export default function PlayerModal() {
     return (
         <Dialog open={isModalOpen} onOpenChange={handleOpenClose}>
             <DialogContent
-                className="max-w-2xl h-full sm:h-auto max-h-full p-0 gap-1 sm:gap-4 flex flex-col"
+                className="max-w-3xl h-full sm:h-auto max-h-full p-0 gap-1 sm:gap-4 flex flex-col"
             // onOpenAutoFocus={(e) => e.preventDefault()}
             >
                 <DialogHeader className="p-4 border-b">
@@ -194,6 +199,11 @@ export default function PlayerModal() {
                                 {selectedTab === 'Ban' && <PlayerBanTab
                                     banTemplates={modalData.banTemplates}
                                     playerRef={playerRef!}
+                                />}
+                                {selectedTab === 'Login' && <PlayerLastConnectionTab
+                                    player={modalData.player}
+                                    serverTime={modalData.serverTime}
+                                    tsFetch={tsFetch}
                                 />}
                             </>
                         )}

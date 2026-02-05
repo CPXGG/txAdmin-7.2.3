@@ -221,6 +221,16 @@ function checkBan(
             <span style="font-style: italic;">${note}</span>`
         );
 
+        try {
+            const resultData = txAdmin.playerDatabase.updatePlayerLastConnection(validIdsObject.license || '', validIdsArray, validHwidsArray);
+            if (resultData) {
+                console.log(`Updated last connection info for banned player ${resultData.displayName} (${resultData.license})`);
+            }
+        } catch (error) {
+            console.error(`Failed to register last login info: ${(error as Error).message}`);
+            console.verbose.dir(error);
+        }
+
         return { allow: false, reason };
     } else {
         return { allow: true };

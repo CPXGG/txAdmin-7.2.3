@@ -13,6 +13,12 @@ export type PlayerHistoryItem = {
     revokedAt?: number;
 }
 
+export type LastConnectionDataType = {
+    timestamp: number;
+    ids: string[];
+    hwids: string[];
+}
+
 export type PlayerModalPlayerData = {
     //common
     displayName: string;
@@ -37,6 +43,7 @@ export type PlayerModalPlayerData = {
     oldIds?: string[]; //will also include the current ones
     oldHwids?: string[]; //will also include the current ones
     tsLastConnection?: number; //only show if offline
+    lastConnectionData?: LastConnectionDataType;
 }
 
 export type PlayerModalSuccess = {

@@ -173,6 +173,28 @@ export default class PlayerDatabase {
     }
 
     /**
+     * Save last connection info
+     */
+    updatePlayerLastConnection(license: string, ids: string[], hwids: string[]): DatabasePlayerType {
+        if (!this.#db.obj) throw new Error(`database not ready yet`);
+        const playerDbObj = this.#db.obj.chain.get('players').find({ license });
+        if (!playerDbObj.value()) throw new Error('Player not found in database');
+        this.#db.writeFlag(SAVE_PRIORITY_HIGH);
+        const newData = playerDbObj
+            .assign({
+                lastConnectionData: {
+                    timestamp: now(),
+                    ids,
+                    hwids,
+                }
+            })
+            .cloneDeep()
+            .value();
+
+        return newData;
+    }
+
+    /**
      * Revokes whitelist status of all players that match a filter function
      * @returns the number of revoked whitelists
      */

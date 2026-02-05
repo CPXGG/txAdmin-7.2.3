@@ -127,7 +127,7 @@ export default function PlayerModalFooter({ playerRef, player }: PlayerModalFoot
     }
 
     return (
-        <DialogFooter className="max-w-2xl gap-2 p-2 md:p-4 border-t grid grid-cols-2 sm:flex">
+        <DialogFooter className="max-w-3xl gap-2 p-2 md:p-4 border-t grid grid-cols-2 sm:flex">
             <Button
                 variant='outline'
                 size='sm'

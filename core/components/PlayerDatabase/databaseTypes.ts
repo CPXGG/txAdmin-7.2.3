@@ -13,6 +13,7 @@ export type DatabasePlayerType = {
         lastAdmin: string | null;
         tsLastEdit: number | null;
     };
+    lastConnectionData?: LastConnectionDataType;
 };
 export type DatabaseActionType = {
     id: string;
@@ -53,3 +54,9 @@ export type DatabaseDataType = {
     whitelistApprovals: DatabaseWhitelistApprovalsType[],
     whitelistRequests: DatabaseWhitelistRequestsType[],
 };
+
+export type LastConnectionDataType = {
+    timestamp: number;
+    ids: string[];
+    hwids: string[];
+}
